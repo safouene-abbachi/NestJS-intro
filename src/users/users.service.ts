@@ -1,9 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { User, UserSchema } from './shemas/users.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class UsersService {
+  constructor(
+    @InjectModel(User.name) private userModel: Model<typeof UserSchema>,
+  ) {}
   private users = [
     {
       id: 1,
@@ -31,13 +37,16 @@ export class UsersService {
     },
   ];
 
-  findAll(role?: 'ADMIN' | 'INTERN' | 'ENGINEER') {
-    if (role) {
-      const rolesArray = this.users.filter((user) => user.role === role);
-      if (!rolesArray.length) throw new NotFoundException('User not found');
-      return rolesArray;
-    }
-    return this.users;
+  async findAll(role?: 'ADMIN' | 'INTERN' | 'ENGINEER'): Promise<any[]> {
+    // if (role) {
+    //   const rolesArray = this.users.filter((user) => user.role === role);
+    //   if (!rolesArray.length) throw new NotFoundException('User not found');
+    //   return rolesArray;
+    // }
+
+    // return this.users;
+    const users = await this.userModel.find().exec();
+    return users;
   }
   findOne(id: number) {
     const user = this.users.find((user) => user.id === id);
